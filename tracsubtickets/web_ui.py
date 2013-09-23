@@ -35,6 +35,7 @@ from trac.ticket.model import Ticket
 from trac.resource import ResourceNotFound
 from genshi.builder import tag
 from genshi.filters import Transformer
+from datetime import date, datetime
 
 from api import NUMBERS_RE, _
 
@@ -171,12 +172,26 @@ class SubTicketsModule(Component):
                         type = tag.td(ticket['type'])
                         # 3rd column
                         status = tag.td(ticket['status'])
-                        # 4th column
+                        # 4th column due day
+                        if (ticket['duedate'] and ticket['status'] != 'closed'):
+                            yyyy_mm_dd = ticket['duedate'].split('-')
+                            due_date_datetime = date(int(yyyy_mm_dd[0]), int(yyyy_mm_dd[1]), int(yyyy_mm_dd[2]))
+                            today_datetime = date.today()
+
+                            if (today_datetime > due_date_datetime):
+                                due_date = tag.td(ticket['duedate'], style='color: red')
+                            elif (today_datetime == due_date_datetime):
+                                due_date = tag.td(ticket['duedate'], style='color: green')
+                            else:
+                                due_date = tag.td(ticket['duedate']);
+                        else:
+                            due_date = tag.td(ticket['duedate']);
+                        # 5th column
                         href = req.href.query(status='!closed',
                                               owner=ticket['owner'])
                         owner = tag.td(tag.a(ticket['owner'], href=href))
 
-                        tbody.append(tag.tr(summary, type, status, owner))
+                        tbody.append(tag.tr(summary, type, status, due_date, owner))
                         _func(children[id], depth + 1)
 
                 _func(data['subtickets'])
