@@ -191,7 +191,8 @@ class SubTicketsModule(Component):
                                               owner=ticket['owner'])
                         owner = tag.td(tag.a(ticket['owner'], href=href))
 
-                        tbody.append(tag.tr(summary, type, status, due_date, owner))
+                        tr_class = 'ticket_' + ticket['status']
+                        tbody.append(tag.tr(summary, type, status, due_date, owner, class_=tr_class))
                         _func(children[id], depth + 1)
 
                 _func(data['subtickets'])
